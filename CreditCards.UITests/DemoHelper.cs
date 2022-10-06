@@ -8,7 +8,7 @@ namespace CreditCards.UITests
         /// Thread pause
         /// </summary>
         /// <param name="timeToSleep">Thead time sleep, ms</param>
-        public static void Pause(int timeToSleep= 3000)
+        public static void Pause(int timeToSleep= 1500)
         {
             Thread.Sleep(timeToSleep);
         }
