@@ -102,9 +102,17 @@ namespace CreditCards.UITests
                 driver.Navigate().GoToUrl(HomePageUrl);
                 DemoHelper.Pause();
 
-                var firstCellOftable = driver.FindElement(By.TagName("td")).Text;
+                var firstCellOftable = driver.FindElements(By.TagName("td"));
 
-                Assert.Equal("Easy Credit Card", firstCellOftable);
+                Assert.Equal("Easy Credit Card", firstCellOftable[0].Text);
+                Assert.Equal("20% APR", firstCellOftable[1].Text);
+
+                Assert.Equal("Silver Credit Card", firstCellOftable[2].Text);
+                Assert.Equal("18% APR", firstCellOftable[3].Text);
+
+                Assert.Equal("Gold Credit Card", firstCellOftable[4].Text);
+                Assert.Equal("17% APR", firstCellOftable[5].Text);
+
                 Assert.Equal(HomePageUrl, driver.Url);              
             }
         }
