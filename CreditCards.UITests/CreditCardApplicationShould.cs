@@ -119,13 +119,14 @@ namespace CreditCards.UITests
                 testOutput.WriteLine($"{DateTime.Now.ToLongTimeString()} Finding element");
                 var applyLowRateButton = driver.FindElement(By.ClassName("customer-service-apply-now"));
 
-                testOutput.WriteLine($"{DateTime.Now.ToLongTimeString()} Found elemnt displayed {applyLowRateButton.Displayed} and enable {applyLowRateButton.Enabled}");
+                testOutput.WriteLine($"{DateTime.Now.ToLongTimeString()} Found element displayed {applyLowRateButton.Displayed} and enable {applyLowRateButton.Enabled}");
                 testOutput.WriteLine($"{DateTime.Now.ToLongTimeString()} Click");
                 applyLowRateButton.Click();
                 DemoHelper.Pause();
 
                 Assert.NotEqual("Credit Card Application - Credit Cards", driver.Title);
                 Assert.NotEqual(ApplyPageUrl, driver.Url);
+                DemoHelper.Pause();
             }
         }
 
@@ -138,7 +139,7 @@ namespace CreditCards.UITests
                 driver.Navigate().GoToUrl(HomePageUrl);
 
                 testOutput.WriteLine($"{DateTime.Now.ToLongTimeString()} Finding element");
-                WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(40));
+                WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(35));
                 
                 Func<IWebDriver, IWebElement> findEnableAndVisible = delegate (IWebDriver d)
                 {
@@ -165,8 +166,8 @@ namespace CreditCards.UITests
                 appleLink.Click();
                 DemoHelper.Pause();
 
-                Assert.NotEqual("Credit Card Application - Credit Cards", driver.Title);
-                Assert.NotEqual(ApplyPageUrl, driver.Url);
+                Assert.Equal("Credit Card Application - Credit Cards", driver.Title);
+                Assert.Equal(ApplyPageUrl, driver.Url);
             }
         }
 
@@ -219,6 +220,136 @@ namespace CreditCards.UITests
 
                 Assert.Equal("Credit Card Application - Credit Cards", driver.Title);
                 Assert.Equal(ApplyPageUrl, driver.Url);
+            }
+        }
+
+        [Fact]
+        public void BeSubmitted_Valid_Form()
+        {
+            const string firstName = "Sergey";
+            const string lastName = "Super";
+            const int FrequentFlyerNumber = 10;
+            const int Age = 18;
+            const decimal GrossAnnualIncome = 10000M;
+
+            using (IWebDriver driver = new ChromeDriver())
+            {
+                driver.Navigate().GoToUrl(ApplyPageUrl);
+                DemoHelper.Pause();
+
+                driver.FindElement(By.Id("FirstName")).SendKeys(firstName);
+                driver.FindElement(By.Id("LastName")).SendKeys(lastName);
+                driver.FindElement(By.Id("FrequentFlyerNumber")).SendKeys(FrequentFlyerNumber.ToString());
+                driver.FindElement(By.Id("Age")).SendKeys(Age.ToString());
+                driver.FindElement(By.Id("GrossAnnualIncome")).SendKeys(GrossAnnualIncome.ToString());
+                driver.FindElement(By.Id("Married")).Click();
+                DemoHelper.Pause();
+
+                IWebElement businessSourceSelectedElement = driver.FindElement(By.Id("BusinessSource"));
+                SelectElement businessSource = new SelectElement(businessSourceSelectedElement);
+                Assert.Equal("I'd Rather Not Say", businessSource.SelectedOption.Text);
+
+                foreach(var element in businessSource.Options)
+                {
+                    testOutput.WriteLine($"Value - {element.GetAttribute("value")} and Text - {element.Text}" );
+                }
+                Assert.Equal(5, businessSource.Options.Count);
+
+                businessSource.SelectByValue("Email");
+                DemoHelper.Pause();
+                businessSource.SelectByText("Internet Search");
+                DemoHelper.Pause();
+                businessSource.SelectByIndex(4);
+                DemoHelper.Pause();
+
+                driver.FindElement(By.Id("TermsAccepted")).Click();
+                DemoHelper.Pause();
+
+                // driver.FindElement(By.Id("SubmitApplication")).Click();
+                driver.FindElement(By.Id("Married")).Submit();
+                DemoHelper.Pause();
+
+                Assert.StartsWith("Application Complete", driver.Title);
+                Assert.NotEmpty(driver.FindElement(By.Id("ReferenceNumber")).Text);
+                Assert.Equal("ReferredToHuman",driver.FindElement(By.Id("Decision")).Text);
+                Assert.Equal(firstName + " " + lastName, driver.FindElement(By.Id("FullName")).Text);
+                Assert.Equal(Age.ToString(), driver.FindElement(By.Id("Age")).Text);              
+                Assert.Equal(GrossAnnualIncome.ToString(), driver.FindElement(By.Id("Income")).Text);
+                Assert.Equal("Married", driver.FindElement(By.Id("RelationshipStatus")).Text);
+                Assert.Equal("TV", driver.FindElement(By.Id("BusinessSource")).Text);
+            }
+        }
+
+        [Fact]
+        public void BeSubmitted_Invalid_Form()
+        {
+            const string firstName = "Sergey";
+            const string lastName = "Super";
+            const int FrequentFlyerNumber = 10;
+            const int invalidAge = 17;
+            const int validAge = 18;
+            const decimal GrossAnnualIncome = 10000M;
+
+            using (IWebDriver driver = new ChromeDriver())
+            {
+                driver.Navigate().GoToUrl(ApplyPageUrl);
+                DemoHelper.Pause();
+
+                driver.FindElement(By.Id("FirstName")).SendKeys(firstName);
+                
+                // Skip LastName
+                //driver.FindElement(By.Id("LastName")).SendKeys(lastName);
+
+                driver.FindElement(By.Id("FrequentFlyerNumber")).SendKeys(FrequentFlyerNumber.ToString());
+                driver.FindElement(By.Id("Age")).SendKeys(invalidAge.ToString());
+                driver.FindElement(By.Id("GrossAnnualIncome")).SendKeys(GrossAnnualIncome.ToString());
+                driver.FindElement(By.Id("Married")).Click();
+                DemoHelper.Pause();
+
+                IWebElement businessSourceSelectedElement = driver.FindElement(By.Id("BusinessSource"));
+                SelectElement businessSource = new SelectElement(businessSourceSelectedElement);
+                Assert.Equal("I'd Rather Not Say", businessSource.SelectedOption.Text);
+
+                foreach (var element in businessSource.Options)
+                {
+                    testOutput.WriteLine($"Value - {element.GetAttribute("value")} and Text - {element.Text}");
+                }
+                Assert.Equal(5, businessSource.Options.Count);
+
+                businessSource.SelectByValue("Email");
+                DemoHelper.Pause();
+                businessSource.SelectByText("Internet Search");
+                DemoHelper.Pause();
+                businessSource.SelectByIndex(4);
+                DemoHelper.Pause();
+
+                driver.FindElement(By.Id("TermsAccepted")).Click();
+                DemoHelper.Pause();
+
+                driver.FindElement(By.Id("SubmitApplication")).Click();                
+                DemoHelper.Pause();
+
+                var validationErrors = driver.FindElements(By.CssSelector(".validation-summary-errors > ul > li"));
+                Assert.Equal(2, validationErrors.Count);
+                Assert.Equal("Please provide a last name", validationErrors[0].Text);
+                Assert.Equal("You must be at least 18 years old", validationErrors[1].Text);
+
+                //Fix validation's errors
+                driver.FindElement(By.Id("LastName")).SendKeys(lastName);
+                driver.FindElement(By.Id("Age")).Clear();
+                driver.FindElement(By.Id("Age")).SendKeys(validAge.ToString());
+
+                driver.FindElement(By.Id("SubmitApplication")).Click();
+                DemoHelper.Pause();
+
+                Assert.StartsWith("Application Complete", driver.Title);
+                Assert.NotEmpty(driver.FindElement(By.Id("ReferenceNumber")).Text);
+                Assert.Equal("ReferredToHuman", driver.FindElement(By.Id("Decision")).Text);
+                Assert.Equal(firstName + " " + lastName, driver.FindElement(By.Id("FullName")).Text);
+                Assert.Equal(validAge.ToString(), driver.FindElement(By.Id("Age")).Text);
+                Assert.Equal(GrossAnnualIncome.ToString(), driver.FindElement(By.Id("Income")).Text);
+                Assert.Equal("Married", driver.FindElement(By.Id("RelationshipStatus")).Text);
+                Assert.Equal("TV", driver.FindElement(By.Id("BusinessSource")).Text);
             }
         }
     }
