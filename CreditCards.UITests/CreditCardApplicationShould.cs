@@ -2,6 +2,7 @@
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 using System;
+using System.Collections.ObjectModel;
 using System.Runtime.Remoting.Messaging;
 using Xunit;
 using Xunit.Abstractions;
@@ -15,6 +16,7 @@ namespace CreditCards.UITests
     {
         public const string HomePageUrl = "http://localhost:44108/";
         public const string ApplyPageUrl = "http://localhost:44108/Apply";
+        public const string ContactUrl = "http://localhost:44108/Home/Contact";
         private readonly ITestOutputHelper testOutput;
 
         public CreditCardApplicationShould(ITestOutputHelper testOutput)
@@ -67,6 +69,7 @@ namespace CreditCards.UITests
             using (IWebDriver driver = new ChromeDriver())
             {
                 driver.Navigate().GoToUrl(HomePageUrl);
+                driver.Manage().Window.Minimize();
                 DemoHelper.Pause();
 
                 WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(11));
@@ -350,6 +353,29 @@ namespace CreditCards.UITests
                 Assert.Equal(GrossAnnualIncome.ToString(), driver.FindElement(By.Id("Income")).Text);
                 Assert.Equal("Married", driver.FindElement(By.Id("RelationshipStatus")).Text);
                 Assert.Equal("TV", driver.FindElement(By.Id("BusinessSource")).Text);
+            }
+        }
+
+        [Fact]
+        public void OpenContactFooterLinkNewTab() 
+        {
+            using (IWebDriver driver = new ChromeDriver())
+            {
+                driver.Navigate().GoToUrl(HomePageUrl);
+                DemoHelper.Pause();
+
+                driver.FindElement(By.Id("ContactFooter")).Click();
+                DemoHelper.Pause();
+
+                ReadOnlyCollection<string> tabs = driver.WindowHandles;
+
+                string homePageTab= tabs[0];
+                string contactPageTab= tabs[1];
+
+                driver.SwitchTo().Window(contactPageTab);
+
+                Assert.StartsWith("Contact", driver.Title);
+                Assert.Equal(ContactUrl, driver.Url);
             }
         }
     }
