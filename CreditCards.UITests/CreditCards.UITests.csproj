@@ -93,6 +93,7 @@
     <Compile Include="CreditCardApplicationShould.cs" />
     <Compile Include="CreditCardWebAppShould.cs" />
     <Compile Include="DemoHelper.cs" />
+    <Compile Include="JavaScriptExamples.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
