@@ -124,7 +124,10 @@ namespace CreditCards.UITests
 
                 testOutput.WriteLine($"{DateTime.Now.ToLongTimeString()} Found element displayed {applyLowRateButton.Displayed} and enable {applyLowRateButton.Enabled}");
                 testOutput.WriteLine($"{DateTime.Now.ToLongTimeString()} Click");
-                applyLowRateButton.Click();
+                if (applyLowRateButton.Displayed)
+                {
+                    applyLowRateButton.Click();
+                }
                 DemoHelper.Pause();
 
                 Assert.NotEqual("Credit Card Application - Credit Cards", driver.Title);
