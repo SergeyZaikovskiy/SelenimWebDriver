@@ -1,7 +1,7 @@
-﻿using System.Threading;
-
-namespace CreditCards.UITests
+﻿namespace CreditCards.UITests
 {
+    using System.Threading;
+
     internal static class DemoHelper
     {
         /// <summary>

@@ -1,9 +1,9 @@
-﻿using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using Xunit;
-
-namespace CreditCards.UITests
+﻿namespace CreditCards.UITests
 {
+    using OpenQA.Selenium;
+    using OpenQA.Selenium.Chrome;
+    using Xunit;
+
     public class JavaScriptExamples
     {
         [Fact]
