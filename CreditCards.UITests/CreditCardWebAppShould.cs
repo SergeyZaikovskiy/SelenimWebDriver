@@ -28,19 +28,19 @@
         public void LoadApplicationPageWithSizeAndPosition()
         {
             var homePageObjectModel = new HomePageObjectModel(chromeDriverFixture.Driver);
-            homePageObjectModel.NavigateTo();             
-              
-            driver.Manage().Window.Maximize();
+            homePageObjectModel.NavigateTo();
+
+            chromeDriverFixture.Driver.Manage().Window.Maximize();
             DemoHelper.Pause();
-            driver.Manage().Window.Minimize();
+            chromeDriverFixture.Driver.Manage().Window.Minimize();
             DemoHelper.Pause();
-            driver.Manage().Window.Size = new System.Drawing.Size(500, 500);
+            chromeDriverFixture.Driver.Manage().Window.Size = new System.Drawing.Size(500, 500);
             DemoHelper.Pause();
-            driver.Manage().Window.Position = new System.Drawing.Point(100, 100);
+            chromeDriverFixture.Driver.Manage().Window.Position = new System.Drawing.Point(100, 100);
             DemoHelper.Pause();
-            driver.Manage().Window.Position = new System.Drawing.Point(500, 500);
+            chromeDriverFixture.Driver.Manage().Window.Position = new System.Drawing.Point(500, 500);
             DemoHelper.Pause();
-            driver.Manage().Window.FullScreen();
+            chromeDriverFixture.Driver.Manage().Window.FullScreen();
             DemoHelper.Pause(5000); 
         }
 
@@ -59,9 +59,10 @@
 
             var initialGenerationToken = homePageObjectModel.GetToken;
 
-            driver.Navigate().GoToUrl(HomePageObjectModel.AboutPageUrl); 
-               
-            driver.Navigate().Back();             
+            var applicationPageObjectModel = new ApplicationPageObjectModel(chromeDriverFixture.Driver);
+            applicationPageObjectModel.NavigateTo();
+
+            chromeDriverFixture.Driver.Navigate().Back();
 
             homePageObjectModel.EnsurePageIsLoaded();
             var refreshGenerationToken = homePageObjectModel.GetToken;               
@@ -72,15 +73,16 @@
         [Fact]
         public void ReloadHomePageForward()
         {
-            driver.Navigate().GoToUrl(HomePageObjectModel.AboutPageUrl);
+            var applicationPageObjectModel = new ApplicationPageObjectModel(chromeDriverFixture.Driver);
+            applicationPageObjectModel.NavigateTo();
 
             var homePageObjectModel = new HomePageObjectModel(chromeDriverFixture.Driver);
             homePageObjectModel.NavigateTo();
 
             var initialGenerationToken = homePageObjectModel.GetToken;
 
-            driver.Navigate().Back();   
-            driver.Navigate().Forward();
+            chromeDriverFixture.Driver.Navigate().Back();
+            chromeDriverFixture.Driver.Navigate().Forward();
 
             homePageObjectModel.EnsurePageIsLoaded();
             var refreshGenerationToken = homePageObjectModel.GetToken;
@@ -112,7 +114,7 @@
 
             homePageModel.LiveChatClick();
 
-            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
+            WebDriverWait wait = new WebDriverWait(chromeDriverFixture.Driver, TimeSpan.FromSeconds(5));
             IAlert alert = wait.Until(ExpectedConditions.AlertIsPresent());
 
             Assert.Equal("Live chat is currently closed.", alert.Text);
@@ -128,14 +130,14 @@
 
             homePageModel.LearnAboutUsClick();
 
-            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
+            WebDriverWait wait = new WebDriverWait(chromeDriverFixture.Driver, TimeSpan.FromSeconds(5));
             IAlert alert = wait.Until(ExpectedConditions.AlertIsPresent());              
 
             Assert.Equal("Do you want to learn more about us?", alert.Text);
 
             alert.Accept();
 
-            Assert.Equal(HomePageObjectModel.AboutPageUrl, driver.Url);
+            Assert.Equal(HomePageObjectModel.AboutPageUrl, chromeDriverFixture.Driver.Url);
         }
 
         private static void NewMethod(HomePageObjectModel homePageModel)
@@ -151,7 +153,7 @@
 
             homePageModel.LearnAboutUsClick();
 
-            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
+            WebDriverWait wait = new WebDriverWait(chromeDriverFixture.Driver, TimeSpan.FromSeconds(5));
             IAlert alert = wait.Until(ExpectedConditions.AlertIsPresent());              
 
             Assert.Equal("Do you want to learn more about us?", alert.Text);             
@@ -167,13 +169,13 @@
             var homePageModel = new HomePageObjectModel(chromeDriverFixture.Driver);
             homePageModel.NavigateTo();
 
-            driver.Manage().Cookies.AddCookie(new Cookie("acceptedCookies", "true"));
-            driver.Navigate().Refresh();
+            chromeDriverFixture.Driver.Manage().Cookies.AddCookie(new Cookie("acceptedCookies", "true"));
+            chromeDriverFixture.Driver.Navigate().Refresh();
 
             Assert.False(homePageModel.IsCookieMessagePresent);
 
-            driver.Manage().Cookies.DeleteCookieNamed("acceptedCookies");
-            driver.Navigate().Refresh();
+            chromeDriverFixture.Driver.Manage().Cookies.DeleteCookieNamed("acceptedCookies");
+            chromeDriverFixture.Driver.Navigate().Refresh();
 
             Assert.True(homePageModel.IsCookieMessagePresent);
         }
@@ -185,7 +187,7 @@
             var homePageModel = new HomePageObjectModel(chromeDriverFixture.Driver);
             homePageModel.NavigateTo();
 
-            ITakesScreenshot screenshotAboutPageDriver = (ITakesScreenshot)driver;
+            ITakesScreenshot screenshotAboutPageDriver = (ITakesScreenshot)chromeDriverFixture.Driver;
 
             Screenshot screenshotAboutPage = screenshotAboutPageDriver.GetScreenshot();
             screenshotAboutPage.SaveAsFile("aboutpage.bmp", ScreenshotImageFormat.Bmp);
@@ -207,9 +209,9 @@
             string homePageTab = tabs[0];
             string contactPageTab = tabs[1];
 
-            driver.SwitchTo().Window(contactPageTab);
+            chromeDriverFixture.Driver.SwitchTo().Window(contactPageTab);
 
-            Assert.EndsWith("/Home/Contact", driver.Url);
+            Assert.EndsWith("/Home/Contact", chromeDriverFixture.Driver.Url);
         }
     }
 }

@@ -4,30 +4,17 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Xunit;
 
 namespace CreditCards.UITests.ObjectModels
 {
-    public class HomePageObjectModel
+    public class HomePageObjectModel : BasePageObjectModel
     {
-        public const string PageUrl = "http://localhost:44108/";
         public const string AboutPageUrl = "http://localhost:44108/Home/About";
-        public const string PageTitle = "Home Page - Credit Cards";
 
-        private readonly IWebDriver driver;
+        public override string PageUrl => "http://localhost:44108/";      
+        public override string PageTitle => "Home Page - Credit Cards";
 
-        public HomePageObjectModel(IWebDriver driver)
-        {
-            this.driver = driver;
-        }
-
-        public void NavigateTo()
-        {
-            driver.Navigate().GoToUrl(PageUrl);
-            EnsurePageIsLoaded();
-        }        
+        public HomePageObjectModel(IWebDriver driver) : base(driver) { }
 
         public ReadOnlyCollection<(string productName, string interestRate)> Products
         {
@@ -46,27 +33,6 @@ namespace CreditCards.UITests.ObjectModels
                 }
 
                 return products.AsReadOnly();
-            }
-        }
-
-        public void EnsurePageIsLoaded(bool checkUrlStartWithExpectedText = true)
-        {
-            bool isUrlCorrect;
-
-            if (checkUrlStartWithExpectedText)
-            {
-                isUrlCorrect = driver.Url.StartsWith(PageUrl);
-            }
-            else
-            {
-                isUrlCorrect = driver.Url == PageUrl;
-            }
-
-            bool pageLoaded = isUrlCorrect && (PageTitle == driver.Title);
-
-            if (!pageLoaded)
-            {
-                throw new Exception($"Page {PageUrl} isn't loaded correctly. Page source {driver.PageSource}");
             }
         }
 
@@ -101,10 +67,13 @@ namespace CreditCards.UITests.ObjectModels
             }
         }
 
-        public void WaitForCarouselEasyApplyNow()
+        public ApplicationPageObjectModel CarouselEasyApplyNow()
         {
-            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(11));
-            IWebElement applyLink = wait.Until(ExpectedConditions.ElementToBeClickable(By.LinkText("Easy: Apply Now!")));
+            string script = @"document.evaluate('//a[text()[contains(.,\'Easy: Apply Now!\')]]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click();";
+            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+            js.ExecuteScript(script);
+
+            return new ApplicationPageObjectModel(driver);
         }
 
         public ApplicationPageObjectModel EasyApplyNowLinkClick()
@@ -121,10 +90,29 @@ namespace CreditCards.UITests.ObjectModels
 
         public ApplicationPageObjectModel CustomerServiceApplyNowLinkClick()
         {
-            driver.FindElement(By.ClassName("customer-service-apply-now")).Click();
+            string script = @" document.getElementsByClassName('btn btn-default customer-service-apply-now')[0].click();";
+            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+            js.ExecuteScript(script);
+
             return new ApplicationPageObjectModel(driver);
         }
 
-        public void ClickRandomGreeting() => driver.FindElement(By.PartialLinkText("- Apply Now!")).Click();
+        public ApplicationPageObjectModel ClickRandomGreetingFindingByPartialText()
+        {
+            driver.FindElement(By.PartialLinkText("- Apply Now!")).Click();
+            return new ApplicationPageObjectModel(driver);
+        }
+
+        public ApplicationPageObjectModel ClickRandomGreetingFindingByAbsolueXPath()
+        {
+            driver.FindElement(By.XPath("/html/body/div/div[4]/div/p/a")).Click();
+            return new ApplicationPageObjectModel(driver);
+        }
+
+        internal ApplicationPageObjectModel ClickRandomGreetingFindingByRelativeXPath()
+        {            
+            driver.FindElement(By.XPath("//a[text()[contains(.,'- Apply Now!')]]")).Click();
+            return new ApplicationPageObjectModel(driver);
+        }
     }
 }

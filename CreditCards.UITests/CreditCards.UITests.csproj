@@ -97,6 +97,7 @@
     <Compile Include="JavaScriptExamples.cs" />
     <Compile Include="ObjectModels\ApplicationCompletePageModel.cs" />
     <Compile Include="ObjectModels\ApplicationPageObjectModel.cs" />
+    <Compile Include="ObjectModels\BasePageObjectModel.cs" />
     <Compile Include="ObjectModels\HomePageObjectModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -1,27 +1,19 @@
 ﻿namespace CreditCards.UITests
 {
-    using CreditCards.UITests.ObjectModels;
-    using OpenQA.Selenium;
-    using OpenQA.Selenium.Chrome;
-    using OpenQA.Selenium.Support.UI;
-    using System;   
+    using CreditCards.UITests.ObjectModels;  
     using Xunit;
     using Xunit.Abstractions;   
 
     [Trait("Category", "Applications")]
     public class CreditCardApplicationShould : IClassFixture<ChromeDriverFixture>
     {
-        private readonly ChromeDriverFixture chromeDriverFixture;
-
-        // private readonly ITestOutputHelper testOutput;
-        //public CreditCardApplicationShould(ITestOutputHelper testOutput)
-        //{
-        //    this.testOutput = testOutput;
-        //}
+        private readonly ChromeDriverFixture chromeDriverFixture;       
 
         public CreditCardApplicationShould(ChromeDriverFixture chromeDriverFixture)
         {
             this.chromeDriverFixture = chromeDriverFixture;
+            this.chromeDriverFixture.Driver.Manage().Cookies.DeleteAllCookies();
+            this.chromeDriverFixture.Driver.Navigate().GoToUrl("about:blank");
         }
 
         [Fact]
@@ -41,8 +33,7 @@
             var homePageModel = new HomePageObjectModel(chromeDriverFixture.Driver);
             homePageModel.NavigateTo();
 
-            homePageModel.WaitForCarouselEasyApplyNow();
-            ApplicationPageObjectModel applicationPageObject = homePageModel.EasyApplyNowLinkClick();
+            var applicationPageObject = homePageModel.CarouselEasyApplyNow();            
 
             applicationPageObject.EnsurePageIsLoaded();
         }
@@ -52,14 +43,13 @@
         {
             var homePageModel = new HomePageObjectModel(chromeDriverFixture.Driver);
             homePageModel.NavigateTo();
-
-            // homePageModel.SlideNextClick(3);
-            homePageModel.WaitForCarouselCustomerService();
+           
             ApplicationPageObjectModel applicationPageObject = homePageModel.CustomerServiceApplyNowLinkClick();
 
             applicationPageObject.EnsurePageIsLoaded();            
         }
 
+        #region obsolete tests
         // [Fact]
         // public void BeInitiateFromHomePage_CustomerService_ImplicitWait_Fail()
         // {           
@@ -80,7 +70,7 @@
         //     Assert.NotEqual(ApplyPageUrl, driver.Url);
         //     DemoHelper.Pause();
         // }
-           
+
         // [Fact]
         // public void BeInitiateFromHomePage_CustomerService_ImplicitWait()
         // {            
@@ -109,6 +99,8 @@
         //     Assert.Equal("Credit Card Application - Credit Cards", driver.Title);
         //     //Assert.Equal(ApplyPageUrl, driver.Url);
         // }
+        #endregion
+
 
         [Fact]
         public void BeInitiateFromHomePage_RandomGreeting()
@@ -116,39 +108,29 @@
             HomePageObjectModel homePageObjectModel = new HomePageObjectModel(chromeDriverFixture.Driver);
             homePageObjectModel.NavigateTo();
 
-            homePageObjectModel.ClickRandomGreeting();
-
-            Assert.Equal("Credit Card Application - Credit Cards", driver.Title);
-            //Assert.Equal(ApplyPageUrl, driver.Url);
+            ApplicationPageObjectModel applicationCompletePageModel = homePageObjectModel.ClickRandomGreetingFindingByPartialText();
+            applicationCompletePageModel.EnsurePageIsLoaded();
         }
 
         [Fact]
         public void BeInitiateFromHomePage_RandomGreeting_AbsoluteXPath()
         {
-            //driver.Navigate().GoToUrl(HomePageUrl);
-            DemoHelper.Pause();
+            HomePageObjectModel homePageObjectModel = new HomePageObjectModel(chromeDriverFixture.Driver);
+            homePageObjectModel.NavigateTo();
 
-            var buttonNext = driver.FindElement(By.XPath("/html/body/div/div[4]/div/p/a"));
-            buttonNext.Click();
-            DemoHelper.Pause();
-
-            Assert.Equal("Credit Card Application - Credit Cards", driver.Title);
-            //Assert.Equal(ApplyPageUrl, driver.Url);
+            ApplicationPageObjectModel applicationCompletePageModel = homePageObjectModel.ClickRandomGreetingFindingByAbsolueXPath();
+            applicationCompletePageModel.EnsurePageIsLoaded();
         }
 
         [Fact]
         public void BeInitiateFromHomePage_RandomGreeting_RelativeXPath()
         {
-            //driver.Navigate().GoToUrl(HomePageUrl);
-            DemoHelper.Pause();
+            HomePageObjectModel homePageObjectModel = new HomePageObjectModel(chromeDriverFixture.Driver);
+            homePageObjectModel.NavigateTo();
 
-            // Xpather.com
-            var buttonNext = driver.FindElement(By.XPath("//a[text()[contains(.,'- Apply Now!')]]"));
-            buttonNext.Click();
-            DemoHelper.Pause();
-
-            Assert.Equal("Credit Card Application - Credit Cards", driver.Title);
-            //Assert.Equal(ApplyPageUrl, driver.Url);
+            // Xpather.com          
+            ApplicationPageObjectModel applicationCompletePageModel = homePageObjectModel.ClickRandomGreetingFindingByRelativeXPath();
+            applicationCompletePageModel.EnsurePageIsLoaded();
         }
 
         [Fact]
@@ -176,7 +158,6 @@
 
             applicationCompletePageModel.EnsurePageIsLoaded();
 
-            Assert.StartsWith("Application Complete", driver.Title);
             Assert.NotEmpty(applicationCompletePageModel.ReferenceNumber);
             Assert.Equal("ReferredToHuman", applicationCompletePageModel.Decision);
             Assert.Equal(firstName + " " + lastName, applicationCompletePageModel.FullName);
